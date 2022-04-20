@@ -1,28 +1,34 @@
 # three-commas-websocket-assist
 
+GNU General Public License v3.0
+
+`pip install three-commas-websocket-assist`
+
+### Import
+```
+from three-commas-websocket-assist import ThreeCommasWebsocketHandler
+```
+
 ### 1. Setting up the listener
-First construct an identifier:
+Pass 3commas api key/secret and the channel you desire to `ThreeCommasWebsocketHandler`:
 ```Python
-deals_channel_identifier = construct_socket_data(
+st = ThreeCommasWebsocketHandler(
     api_key=API_KEY,
     api_secret=API_SECRET,
-    channel="DealsChannel"
+    channel="DealsChannel",
 )
 ```
+`ThreeCommasWebsocketHandler` automatically generates the stream identifier and uses that for the stream
 
-Pass the identifier to `ThreeCommasWebsocketMaster`:
-```Python
-st = ThreeCommasWebsocketMaster(
-    identifier=deals_channel_identifier
-)
-```
 
 ### 2. Handle event
-Pass a custom event handler to  the `ThreeCommasWebsocketMaster` to handle any event based on your deal channel:
+Pass a custom event handler to  the `ThreeCommasWebsocketHandler` to handle any event based on your deal channel:
 Event handler is `Callable[[Dict], None]`
 ```Python
-st = ThreeCommasWebsocketMaster(
-    identifier=deals_channel_identifier,
+st = ThreeCommasWebsocketHandler(
+    api_key=API_KEY,
+    api_secret=API_SECRET,
+    channel="DealsChannel",
     external_event_handler=sample_event_handler
 )
 ```

@@ -3,6 +3,7 @@
 Cyberjunky's 3Commas websocket helper.
 Updated by SanCoca
 """
+from dataclasses import dataclass
 import json
 import logging
 import hashlib
@@ -33,8 +34,9 @@ def construct_socket_data(
     """
     Construct websocket identifier
     """
+    _channel_path = channel_paths[channel]
     _encoded_key = str.encode(api_secret)
-    _message = str.encode(channel_paths[channel])
+    _message = str.encode(_channel_path)
     _signature = hmac.new(_encoded_key, _message, hashlib.sha256).hexdigest()
     _id_data={
         'api_key': api_key,
@@ -46,8 +48,6 @@ def construct_socket_data(
         'users': _users
     }
     return _identifier
-
-#print(json.dumps(identifier))
 
 class ThreeCommasWebsocket:
     """
@@ -183,20 +183,31 @@ class ThreeCommasWebsocket:
         """
         _LOGGER.debug("Websocket error: %s", error)
 
-
-class ThreeCommasWebsocketMaster():
+class ThreeCommasWebsocketHandler():
     """
     Three commas websocket master handler
+    Default channel: DealsChannel
     """
     external_event_handler = None
     _data = None
     listener = None
     def __init__(
         self,
-        identifier,
-        external_event_handler: Callable[[Dict], None] = None
+        external_event_handler: Callable[[Dict], None] = None,
+        api_key: str = "",
+        api_secret: str = "",
+        channel: SocketChannels = "DealsChannel"
     ):
-        self.identifier = identifier
+        if not api_key or not api_secret:
+            raise SystemError("Api key or secret missing")
+        if channel is not SocketChannels:
+            raise SystemError(f"Incorrect/unsupported stream channel {channel}")
+
+        self.identifier = construct_socket_data(
+            api_key=api_key,
+            api_secret=api_secret,
+            channel=channel
+        )
         self.external_event_handler = external_event_handler
         self.start_listener()
 
@@ -229,30 +240,24 @@ def sample_event_handler(data:Dict) -> None:
 
 
 # If script is run directly perform event handling internally. 
-# otherwise call `ThreeCommasWebsocketMaster` Externally. to handle event data properly
+# otherwise call `ThreeCommasWebsocketHandler` Externally. to handle event data properly
 if __name__ == "__main__":
     # If running locally fill key and secret here
     API_KEY = ""
     API_SECRET = ""
 
     # External event handler allows you to use different handlers for different streams.
-    deals_channel_identifier = construct_socket_data(
+    st = ThreeCommasWebsocketHandler(
         api_key=API_KEY,
         api_secret=API_SECRET,
-        channel="DealsChannel"
-    )
-    st = ThreeCommasWebsocketMaster(
-        identifier=deals_channel_identifier,
+        channel="DealsChannel",
         external_event_handler=sample_event_handler
     )
 
     ### Smart trades channel identifier
-    # smart_trade_channel_identifier = construct_socket_data(
+    # st = ThreeCommasWebsocketHandler(
     #     api_key=API_KEY,
     #     api_secret=API_SECRET,
-    #     channel="SmartTradesChannel"
-    # )
-    # st = ThreeCommasWebsocketMaster(
-    #     identifier=smart_trade_channel_identifier,
+    #     channel="SmartTradesChannel",
     #     external_event_handler=sample_event_handler
     # )

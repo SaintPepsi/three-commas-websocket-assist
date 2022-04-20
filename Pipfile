@@ -10,6 +10,7 @@ rel = "*"
 [dev-packages]
 mypy = "*"
 pylint = "*"
+pipenv-setup = "*"
 
 [requires]
 python_version = "3.10"
