@@ -10,9 +10,9 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 setup(
     name='three-commas-websocket-assist',
     packages=['three_commas_websocket_assist'],
-    version='0.1.5',
+    version='0.1.6',
     description='3commas websocket stream assist',
-    url='https://github.com/badass-blockchain/python-three-commas',
+    url='https://github.com/SaintPepsi/three-commas-websocket-assist',
     author='Ron Klinkien & Ian Hogers',
     author_email='info@ianhogers.com',
     long_description=long_description,
