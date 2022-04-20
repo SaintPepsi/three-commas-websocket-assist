@@ -57,7 +57,7 @@ class ThreeCommasWebsocket:
 
     is_running = True
 
-    def __init__(self, on_event=None, identifier=None):
+    def __init__(self, on_event=None, identifier=None, seperate_thread=False):
         """
         :param on_event: function that get's called on received event
         """
@@ -66,6 +66,7 @@ class ThreeCommasWebsocket:
         self.websocket_thread = None
         self._url = 'wss://ws.3commas.io/websocket'
         self.identifier = identifier
+        self.seperate_thread = seperate_thread
 
     def __run_forever_rel_dispatcher(self):
         """
@@ -92,16 +93,11 @@ class ThreeCommasWebsocket:
             on_close=self.__on_close,
         )
 
-        self.__run_forever_rel_dispatcher()
+        if self.seperate_thread:
+            self.__run_forever_thread_daemon()
+        else:
+            self.__run_forever_rel_dispatcher()
 
-        ### Old code for threading.
-        ### if run_forever doesn't work properly
-        ### you might need to remove the snippet `Run forever websocket`
-        ### and uncomment the code below:
-        ### and in the main script add:
-        ### while True:
-        ###     time.sleep(1)
-        # self.__run_forever_thread_daemon()
 
     def start(self):
         """
@@ -109,6 +105,7 @@ class ThreeCommasWebsocket:
         """
         _LOGGER.debug("Websocket client start")
 
+        self.is_running = True
         self.__refresh()
 
 
@@ -141,37 +138,41 @@ class ThreeCommasWebsocket:
         On message event
         """
         # _LOGGER.debug(f"Websocket data: {message}")
-        message = json.loads(message)
-        if "type" not in message:
-            if (
-                "identifier" in message
-                and json.loads(message["identifier"])["channel"]
-                == "DealsChannel"
-                # == "SmartTradesChannel"
-            ):
-                event = message["message"]
-                self.on_event(event)
+        try:
+            message = json.loads(message)
+            if "type" not in message:
+                if (
+                    "identifier" in message
+                    and json.loads(message["identifier"])["channel"]
+                    == "DealsChannel"
+                    # == "SmartTradesChannel"
+                ):
+                    event = message["message"]
+                    self.on_event(event)
+
+                else:
+                    _LOGGER.debug("Malformed data received\n%s", message)
+
+            elif message["type"] == "welcome":
+                _LOGGER.debug("Subscribing to the %s", self.identifier['channel'])
+                self.websocket.send(
+                    json.dumps({
+                        "command": "subscribe",
+                            "identifier": json.dumps(self.identifier),
+                    }
+                    )
+                )
+            elif message["type"] == "confirm_subscription":
+                _LOGGER.debug("Succesfully subscribed %s", self.identifier['channel'])
+
+            elif message["type"] == "ping":
+                pass
 
             else:
-                _LOGGER.debug("Malformed data received\n%s", message)
+                _LOGGER.debug("Received unknown type: %s", message)
 
-        elif message["type"] == "welcome":
-            _LOGGER.debug("Subscribing to the %s", self.identifier['channel'])
-            self.websocket.send(
-                json.dumps({
-                    "command": "subscribe",
-                        "identifier": json.dumps(self.identifier),
-                }
-                )
-            )
-        elif message["type"] == "confirm_subscription":
-            _LOGGER.debug("Succesfully subscribed %s", self.identifier['channel'])
-
-        elif message["type"] == "ping":
-            pass
-
-        else:
-            _LOGGER.debug("Received unknown type: %s", message)
+        except Exception as error:
+            _LOGGER.exception(error)
 
     def __on_error(self, ws, error):
         """
@@ -206,7 +207,6 @@ class ThreeCommasWebsocketHandler():
             channel=channel
         )
         self.external_event_handler = external_event_handler
-        self.start_listener()
 
     def on_event(self, data):
         """
@@ -215,7 +215,7 @@ class ThreeCommasWebsocketHandler():
         _LOGGER.debug("3Commas websocket update received: %s", data)
         self._data = data
 
-    def start_listener(self):
+    def start_listener(self, seperate_thread = False):
         """
         Spawn a new Listener and links it to self.on_trade.
         """
@@ -223,7 +223,11 @@ class ThreeCommasWebsocketHandler():
             if self.external_event_handler \
             else self.on_event
 
-        self.listener = ThreeCommasWebsocket(event_handler, identifier=self.identifier)
+        self.listener = ThreeCommasWebsocket(
+            event_handler,
+            identifier=self.identifier,
+            seperate_thread=seperate_thread
+        )
         _LOGGER.debug("Starting listener")
         self.listener.start()
 
@@ -244,12 +248,12 @@ if __name__ == "__main__":
     API_SECRET = ""
 
     # External event handler allows you to use different handlers for different streams.
-    st = ThreeCommasWebsocketHandler(
-        api_key=API_KEY,
-        api_secret=API_SECRET,
-        channel="DealsChannel",
-        external_event_handler=sample_event_handler
-    )
+    # st = ThreeCommasWebsocketHandler(
+    #     api_key=API_KEY,
+    #     api_secret=API_SECRET,
+    #     channel="DealsChannel",
+    #     external_event_handler=sample_event_handler
+    # )
 
     ### Smart trades channel identifier
     # st = ThreeCommasWebsocketHandler(

@@ -10,7 +10,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 setup(
     name='three-commas-websocket-assist',
     packages=['three_commas_websocket_assist'],
-    version='0.1.9',
+    version='0.2.0',
     description='3commas websocket stream assist',
     url='https://github.com/SaintPepsi/three-commas-websocket-assist',
     author='Ron Klinkien & Ian Hogers',
