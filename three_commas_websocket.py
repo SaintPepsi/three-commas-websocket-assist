@@ -184,7 +184,7 @@ class ThreeCommasWebsocket:
         _LOGGER.debug("Websocket error: %s", error)
 
 
-class ThreeCommas():
+class ThreeCommasWebsocketMaster():
     """
     Three commas websocket master handler
     """
@@ -229,7 +229,7 @@ def sample_event_handler(data:Dict) -> None:
 
 
 # If script is run directly perform event handling internally. 
-# otherwise call `ThreeCommas` Externally. to handle event data properly
+# otherwise call `ThreeCommasWebsocketMaster` Externally. to handle event data properly
 if __name__ == "__main__":
     # If running locally fill key and secret here
     API_KEY = ""
@@ -241,7 +241,7 @@ if __name__ == "__main__":
         api_secret=API_SECRET,
         channel="DealsChannel"
     )
-    st = ThreeCommas(
+    st = ThreeCommasWebsocketMaster(
         identifier=deals_channel_identifier,
         external_event_handler=sample_event_handler
     )
@@ -252,7 +252,7 @@ if __name__ == "__main__":
     #     api_secret=API_SECRET,
     #     channel="SmartTradesChannel"
     # )
-    # st = ThreeCommas(
+    # st = ThreeCommasWebsocketMaster(
     #     identifier=smart_trade_channel_identifier,
     #     external_event_handler=sample_event_handler
     # )
