@@ -141,38 +141,37 @@ class ThreeCommasWebsocket:
         On message event
         """
         # _LOGGER.debug(f"Websocket data: {message}")
-        try:
-            message = json.loads(message)
-            if "type" not in message:
-                if (
-                    "identifier" in message
-                    and json.loads(message["identifier"])["channel"]
-                    == "DealsChannel"
-                    # == "SmartTradesChannel"
-                ):
-                    event = message["message"]
-                    self.on_event(event)
-
-                else:
-                    _LOGGER.debug("Malformed data received\n%s", message)
-
-            elif message["type"] == "welcome":
-                _LOGGER.debug("Subscribing to the %s", self.identifier['channel'])
-                self.websocket.send(
-                    json.dumps({
-                        "command": "subscribe",
-                            "identifier": json.dumps(self.identifier),
-                    }
-                    )
-                )
-            elif message["type"] == "confirm_subscription":
-                _LOGGER.debug("Succesfully subscribed %s", self.identifier['channel'])
-
-            elif message["type"] == "ping":
-                pass
+        message = json.loads(message)
+        if "type" not in message:
+            if (
+                "identifier" in message
+                and json.loads(message["identifier"])["channel"]
+                == "DealsChannel"
+                # == "SmartTradesChannel"
+            ):
+                event = message["message"]
+                self.on_event(event)
 
             else:
-                _LOGGER.debug("Received unknown type: %s", message)
+                _LOGGER.debug("Malformed data received\n%s", message)
+
+        elif message["type"] == "welcome":
+            _LOGGER.debug("Subscribing to the %s", self.identifier['channel'])
+            self.websocket.send(
+                json.dumps({
+                    "command": "subscribe",
+                        "identifier": json.dumps(self.identifier),
+                }
+                )
+            )
+        elif message["type"] == "confirm_subscription":
+            _LOGGER.debug("Succesfully subscribed %s", self.identifier['channel'])
+
+        elif message["type"] == "ping":
+            pass
+
+        else:
+            _LOGGER.debug("Received unknown type: %s", message)
 
     def __on_error(self, ws, error):
         """
