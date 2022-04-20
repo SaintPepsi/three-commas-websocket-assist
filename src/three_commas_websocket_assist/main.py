@@ -19,6 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 SocketChannels = Literal["DealsChannel","SmartTradesChannel"]
+SocketChannelsTuple = ("DealsChannel", "SmartTradesChannel")
 SocketPaths = Literal['/deals', '/smart_trades']
 
 channel_paths: Dict[SocketChannels, SocketPaths] = {
@@ -173,9 +174,6 @@ class ThreeCommasWebsocket:
             else:
                 _LOGGER.debug("Received unknown type: %s", message)
 
-        except Exception as error:
-            _LOGGER.exception(error)
-
     def __on_error(self, ws, error):
         """
         On Error listener
@@ -193,14 +191,14 @@ class ThreeCommasWebsocketHandler():
     listener = None
     def __init__(
         self,
+        api_key: str,
+        api_secret: str,
         external_event_handler: Callable[[Dict], None] = None,
-        api_key: str = "",
-        api_secret: str = "",
         channel: SocketChannels = "DealsChannel"
     ):
         if not api_key or not api_secret:
             raise SystemError("Api key or secret missing")
-        if channel is not SocketChannels:
+        if channel not in SocketChannelsTuple:
             raise SystemError(f"Incorrect/unsupported stream channel {channel}")
 
         self.identifier = construct_socket_data(
