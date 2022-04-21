@@ -158,7 +158,7 @@ class ThreeCommasWebsocket:
                     json.dumps({
                         "command": "subscribe",
                             "identifier": json.dumps(self.identifier),
-                    }
+                        }
                     )
                 )
             elif message["type"] == "confirm_subscription":
@@ -170,6 +170,7 @@ class ThreeCommasWebsocket:
             else:
                 _LOGGER.debug("Received unknown type: %s", message)
 
+        # Need better exception handling here
         except Exception as error:
             _LOGGER.exception(error)
 
