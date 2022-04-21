@@ -144,8 +144,7 @@ class ThreeCommasWebsocket:
                 if (
                     "identifier" in message
                     and json.loads(message["identifier"])["channel"]
-                    == "DealsChannel"
-                    # == "SmartTradesChannel"
+                    in SocketChannelsTuple
                 ):
                     event = message["message"]
                     self.on_event(event)
