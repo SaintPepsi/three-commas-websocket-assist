@@ -10,7 +10,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 setup(
     name='three-commas-websocket-assist',
     packages=['three_commas_websocket_assist'],
-    version='0.2.1',
+    version='0.3.0',
     description='3commas websocket stream assist',
     url='https://github.com/SaintPepsi/three-commas-websocket-assist',
     author='Ron Klinkien & Ian Hogers',
@@ -28,6 +28,6 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Operating System :: Microsoft :: Windows",
     ],
-    install_requires=['rel==0.4.7', 'websocket-client==1.3.2'],
+    install_requires=['rel==0.4.8', 'websocket-client==1.5.1'],
     dependency_links=[]
 )
