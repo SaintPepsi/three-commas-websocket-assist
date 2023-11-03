@@ -1,4 +1,4 @@
-# three-commas-websocket-assist
+# three-commas-websocket-assist - No Longer Maintained, Please fork if you want to use it.
 
 GNU General Public License v3.0
 
